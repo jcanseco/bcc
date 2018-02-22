@@ -57,14 +57,24 @@ class KSyms : SymbolCache {
     bool operator<(const Symbol &rhs) const { return addr < rhs.addr; }
   };
 
-  std::vector<Symbol> syms_;
   std::unordered_map<std::string, uint64_t> symnames_;
   static void _add_symbol(const char *, uint64_t, void *);
+
+protected:
+  std::vector<Symbol> syms_;
 
 public:
   virtual bool resolve_addr(uint64_t addr, struct bcc_symbol *sym, bool demangle = true);
   virtual bool resolve_name(const char *unused, const char *name,
                             uint64_t *addr);
+  virtual void refresh();
+};
+
+class RemoteKSyms : KSyms {
+  std::vector<std::string> kallsyms_;
+
+public:
+  RemoteKSyms(std::vector<std::string> kallsyms);
   virtual void refresh();
 };
 

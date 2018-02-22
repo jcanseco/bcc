@@ -101,6 +101,26 @@ bool KSyms::resolve_name(const char *_unused, const char *name,
   return true;
 }
 
+RemoteKSyms::RemoteKSyms(std::vector<std::string> kallsyms)
+    : kallsyms_(kallsyms) {}
+
+void RemoteKSyms::refresh() {
+  if (syms_.empty()) {
+    for (const auto& sym : kallsyms_) {
+      std::vector<std::string> tokens;
+      std::istringstream iss(sym);
+      for (std::string token; iss >> token;)
+        tokens.push_back(token);
+
+      uint64_t addr = std::stoull(tokens[0], nullptr, 16);
+      std::string name = tokens[2];
+
+      syms_.emplace_back(name.c_str(), addr);
+    }
+    std::sort(syms_.begin(), syms_.end());
+  }
+}
+
 ProcSyms::ProcSyms(int pid, struct bcc_symbol_option *option)
     : pid_(pid), procstat_(pid), mount_ns_instance_(new ProcMountNS(pid_)) {
   if (option)
@@ -358,6 +378,11 @@ void *bcc_symcache_new(int pid, struct bcc_symbol_option *option) {
   if (pid < 0)
     return static_cast<void *>(new KSyms());
   return static_cast<void *>(new ProcSyms(pid, option));
+}
+
+void *bcc_remote_ksymcache_new(char** kallsyms, int num_syms) {
+  std::vector<std::string> syms(kallsyms, kallsyms + num_syms);
+  return static_cast<void *>(new RemoteKSyms(syms));
 }
 
 void bcc_free_symcache(void *symcache, int pid) {

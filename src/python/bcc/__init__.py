@@ -95,6 +95,15 @@ class SymbolCache(object):
             return -1
         return addr.value
 
+class RemoteKernelSymbolCache(SymbolCache):
+    def __init__(self, libremote):
+        kallsyms = libremote.kallsyms()
+
+        syms_as_c_arr = (ct.c_char_p * len(kallsyms))(*kallsyms)
+        num_syms = len(kallsyms)
+
+        self.cache = lib.bcc_remote_ksymcache_new(syms_as_c_arr, num_syms)
+
 class PerfType:
     # From perf_type_id in uapi/linux/perf_event.h
     HARDWARE = 0
@@ -1164,7 +1173,13 @@ class BPF(object):
         if pid < 0 and pid != -1:
             pid = -1
         if not pid in BPF._sym_caches:
-            BPF._sym_caches[pid] = SymbolCache(pid)
+            if (BPF._should_run_on_remote_target() and pid == -1):
+                libremote = BPF._open_connection_to_remote_target()
+                BPF._sym_caches[pid] = RemoteKernelSymbolCache(libremote)
+                libremote.close_connection()
+            else:
+                BPF._sym_caches[pid] = SymbolCache(pid)
+
         return BPF._sym_caches[pid]
 
     @staticmethod
