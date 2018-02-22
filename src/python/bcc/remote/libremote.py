@@ -78,6 +78,11 @@ class LibRemote(object):
         ret = self._remote_send_command(cmd)
         return ret[0] if ret[0] < 0 else ret[1]
 
+    def kallsyms(self):
+        cmd = "GET_KALLSYMS 0"
+        ret = self._remote_send_command(cmd)
+        return ret[0] if ret[0] < 0 else ret[1]
+
     def get_trace_events(self, tracefs, cat):
         cmd = "GET_TRACE_EVENTS {} {}".format(tracefs, cat)
         ret = self._remote_send_command(cmd)
