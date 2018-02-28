@@ -97,7 +97,7 @@ class SymbolCache(object):
 
 class RemoteKernelSymbolCache(SymbolCache):
     def __init__(self, libremote):
-        kallsyms = libremote.kallsyms()
+        kallsyms = libremote.cat_file("/proc/kallsyms")
 
         syms_as_c_arr = (ct.c_char_p * len(kallsyms))(*kallsyms)
         num_syms = len(kallsyms)

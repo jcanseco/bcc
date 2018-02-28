@@ -68,6 +68,11 @@ class LibRemote(object):
         self.nkey_cache[map_fd] = {}
         self.map_dumped[map_fd] = {}
 
+    def cat_file(self, path):
+        cmd = "CAT_FILE {} 0".format(path)
+        ret = self._remote_send_command(cmd)
+        return ret[0] if ret[0] < 0 else ret[1]
+
     def available_filter_functions(self, tracefs):
         cmd = "GET_AVAIL_FILTER_FUNCS {}".format(tracefs)
         ret = self._remote_send_command(cmd)
@@ -75,11 +80,6 @@ class LibRemote(object):
 
     def kprobes_blacklist(self, tracefs):
         cmd = "GET_KPROBES_BLACKLIST {}".format(tracefs)
-        ret = self._remote_send_command(cmd)
-        return ret[0] if ret[0] < 0 else ret[1]
-
-    def kallsyms(self):
-        cmd = "GET_KALLSYMS 0"
         ret = self._remote_send_command(cmd)
         return ret[0] if ret[0] < 0 else ret[1]
 
