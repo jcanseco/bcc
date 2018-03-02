@@ -77,7 +77,15 @@ if(ENABLE_USDT)
 endif()
 
 add_subdirectory(frontends)
-add_subdirectory(bpfd)
+
+# Build the BPFd project
+ExternalProject_Add(
+  bpfd
+  PREFIX bpfd
+  SOURCE_DIR ${CMAKE_CURRENT_SOURCE_DIR}/bpfd
+  CMAKE_ARGS -DCMAKE_INSTALL_PREFIX=${CMAKE_INSTALL_PREFIX}
+  INSTALL_COMMAND cmake -E echo "Skipping install step."
+)
 
 # Link against LLVM libraries
 target_link_libraries(bcc-shared ${bcc_common_libs_for_s})

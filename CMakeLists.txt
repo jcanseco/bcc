@@ -15,6 +15,7 @@ include(CMakeDependentOption)
 include(GNUInstallDirs)
 include(CheckCXXCompilerFlag)
 include(cmake/FindCompilerFlag.cmake)
+include(ExternalProject)
 
 option(ENABLE_CLANG_JIT "Enable Loading BPF through Clang Frontend" ON)
 option(ENABLE_USDT "Enable User-level Statically Defined Tracing" ON)
